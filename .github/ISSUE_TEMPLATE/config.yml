@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 ANIS Documentation
+    url: https://github.com/ANIS-Solutions/anis-documentation
+    about: Check our documentation for answers
+  - name: 💬 Discussions
+    url: https://github.com/ANIS-Solutions/.github/discussions
+    about: Ask questions and share ideas
+  - name: 📅 Project Board
+    url: https://github.com/orgs/ANIS-Solutions/projects/3
+    about: View our project progress
