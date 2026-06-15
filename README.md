@@ -24,7 +24,6 @@ A research-driven machine learning pipeline for on-device child safety moderatio
 ![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?logo=opencv&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-150458?logo=pandas&logoColor=white)
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-F7931E?logo=scikit-learn&logoColor=white)
-![Google Gemini API](https://img.shields.io/badge/Gemini-8E75B2?logo=google-gemini&logoColor=white)
 ![Jupyter](https://img.shields.io/badge/Jupyter-F37626?logo=jupyter&logoColor=white)
 ![Python](https://img.shields.io/badge/python-3776AB?logo=python&logoColor=white)
 
@@ -35,9 +34,8 @@ A research-driven machine learning pipeline for on-device child safety moderatio
 1. Clone the repository:
 
 ```bash
-git clone [https://github.com/ANIS-Solutions/AI-Moderator-Pipeline.git](https://github.com/ANIS-Solutions/AI-Moderator-Pipeline.git)
-cd AI-Moderator-Pipeline
-
+git clone [https://github.com/ANIS-Solutions/AI-onDevice)
+cd AI-onDevice
 ```
 
 2. Install dependencies:
@@ -47,14 +45,9 @@ pip install -r requirements.txt
 
 ```
 
-3. Configure environment variables (Gemini API Key):
 
-```bash
-export GEMINI_API_KEY="your_api_key_here"
 
-```
-
-4. Run the training pipeline:
+3. Run the training pipeline:
 
 ```bash
 cd model_training
@@ -73,20 +66,9 @@ python model_training/train_lora.py
 # Execute evaluation benchmarks (Recall/Precision Analysis)
 python evaluation/calculate_metrics.py
 
-# Run report generation backend (Gemini Integration)
-python cloud_backend/generate_report.py
-
 # Clean research workspace
 rm -rf research_and_experiments/.ipynb_checkpoints
 
 ```
 
 ---
-
-## Bug Reports
-
-If you encounter performance regressions or pipeline failures, please open an Issue with the training logs or evaluation CSV reports attached.
-
-*Bye! ... Bye!*
-
-```
