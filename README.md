@@ -1,4 +1,4 @@
-![](./_assets/anisChildApp-asset.jpg)
+![](./_asset/anisChildApp-asset.jpg)
 
 # AI-Moderator-Pipeline
 
