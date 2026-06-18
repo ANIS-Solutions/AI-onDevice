@@ -1,6 +1,6 @@
-![](./_asset/anisChildApp-asset.jpg)
+![](./_asset/anisondeviceAi-asset.jpg)
 
-# AI-Moderator-Pipeline
+# AI (Child APP Internal Models)
 
 A research-driven machine learning pipeline for on-device child safety moderation and semantic activity analysis. This system leverages Multi-Label Sigmoid architectures, LoRA fine-tuning, and Large Vision-Language Models for dataset harmonization to ensure high-fidelity threat detection with zero-shot generalization.
 
@@ -29,46 +29,4 @@ A research-driven machine learning pipeline for on-device child safety moderatio
 
 ---
 
-## Getting Started
-
-1. Clone the repository:
-
-```bash
-git clone [https://github.com/ANIS-Solutions/AI-onDevice)
-cd AI-onDevice
-```
-
-2. Install dependencies:
-
-```bash
-pip install -r requirements.txt
-
-```
-
-
-
-3. Run the training pipeline:
-
-```bash
-cd model_training
-python train_lora.py
-
-```
-
----
-
-## Development
-
-```bash
-# Run model training (LoRA Fine-tuning)
-python model_training/train_lora.py
-
-# Execute evaluation benchmarks (Recall/Precision Analysis)
-python evaluation/calculate_metrics.py
-
-# Clean research workspace
-rm -rf research_and_experiments/.ipynb_checkpoints
-
-```
-
----
+Found a bug? [Open an issue](https://github.com/ANIS-Solutions/AI-onDevice/issues) with steps to reproduce.

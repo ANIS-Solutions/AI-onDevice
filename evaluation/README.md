@@ -30,20 +30,3 @@ Archive of initial research, notebook iterations, and dataset preparation.
 
 ### 5. `android_app/` (Edge Client)
 * The Android Studio project containing the Kotlin implementation of the ONNX Runtime, CameraX pipeline, FSM stabilization, and the K-Medoids/PCA clustering logic for Edge Condensation.
-
-##  How to Run the ML Pipeline
-
-To reproduce the model locally, navigate to `model_training/` and execute:
-
-```bash
-# 1. Install dependencies
-pip install -r requirements.txt
-
-# 2. Train the LoRA adapters
-python train_lora.py
-
-# 3. Export graphs to ONNX
-python export_onnx.py
-
-# 4. Apply FP16 Quantization
-python optimize_fp16.py

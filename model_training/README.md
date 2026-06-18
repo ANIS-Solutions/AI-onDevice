@@ -68,7 +68,3 @@ After completing the pipeline, the following two files must be copied to the And
 
 1. `text_model.onnx` (Static Float32 embeddings generator)
 2. `vision_model_fp16.onnx` (Dynamic Float16 real-time inference engine)
-
-```
-
-```
