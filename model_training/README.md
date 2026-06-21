@@ -2,7 +2,7 @@
 
 > Fine-tunes a CLIP Vision-Language Model using Low-Rank Adaptation (LoRA) and exports an asymmetric, quantized inference graph for real-time on-device content moderation.
 
-![](_asset/Training pipline.png)
+![](_asset/Training pipline .png)
 *Five-stage training pipeline: CSV ingestion → frozen text encoding with dummy tensor trick → LoRA adapter injection into ViT q/v projections (rank 16, ~4.2% trainable params) → BCEWithLogitsLoss multi-label optimization → asymmetric ONNX export with FP16 quantization, reducing the vision encoder from ~346 MB to 173 MB for on-device inference.*
 
 ---
