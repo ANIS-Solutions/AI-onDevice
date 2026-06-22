@@ -181,14 +181,15 @@ The equal weighting (α = 0.5) is deliberate: neither task dominates. The contra
 
 ## Stage 4 · Export & Quantization — `quantize_onnx.py`
 
-A single script handles the entire post-training pipeline: merge → split → export → quantize → clean up.
+A single script handles the entire post-training pipeline: merge → split → export → quantize → pack → clean up.
 
 ### Step 1 — Merge LoRA Weights
 
 ```python
 peft_model = PeftModel.from_pretrained(base_model, LORA_DIR)   # load clip_hybrid_best/
-merged_model = peft_model.merge_and_unload()                    # W_final = W₀ + BA
-merged_model.save_pretrained(MERGED_DIR)                        # → merged_clip_model/
+merged_model = peft_model.merge_and_unload()                   # W_final = W₀ + BA
+merged_model.save_pretrained(MERGED_DIR)                       # → merged_clip_model/
+
 ```
 
 Both encoder sets of LoRA adapters are merged into their respective base weight matrices. After merging, the adapter matrices A and B are discarded — the model is a standard CLIP ViT with modified weights, requiring no adapter-specific code paths at inference.
@@ -207,54 +208,65 @@ class VisionEncoderWrapper(nn.Module):
 class TextEncoderWrapper(nn.Module):
     def forward(self, input_ids, attention_mask):
         return self.model(input_ids=input_ids, attention_mask=attention_mask, return_dict=False)[0]
+
 ```
 
 Exported at **opset 18** (up from 14 in v1) with `do_constant_folding=True`.
 
 ### Step 3 — Asymmetric Quantization & Packing
 
-The pipeline bifurcates into two deployment-specific outputs:
+The pipeline trifurcates into deployment and evaluation-specific outputs:
 
 **Vision Pathway → Edge Device · [Child App](https://github.com/ANIS-Solutions/Child-app)**
 
 ```python
 vision_fp16 = float16.convert_float_to_float16(onnx.load("vision_model_fp32.onnx"))
 onnx.save(vision_fp16, "vision_model_fp16.onnx")
+
 ```
 
-FP16 post-training quantization halves the memory footprint from ~346 MB to **~173 MB** with zero quantization drift on safety decisions (verified by `evaluation/flipped_decisions_test.py`). Deployed to the Android child application's `assets/` folder for real-time on-device inference.
+FP16 post-training quantization halves the memory footprint from ~346 MB to **~173 MB**. Deployed to the Android child application's `assets/` folder for real-time on-device inference.
 
 **Text Pathway → Cloud Server · [AI-Hosted](https://github.com/ANIS-Solutions/AI-hosted)**
 
 ```python
 text_packed = onnx.load("text_model_fp32.onnx", load_external_data=True)
 onnx.save(text_packed, "text_model_single.onnx")   # all weights in one file
+
 ```
 
 The text encoder is packed into a single self-contained ONNX file (external data inlined) for reliable server deployment. No quantization — the cloud server has no memory constraints, and FP32 precision is retained for maximum semantic fidelity when generating zero-shot policy embeddings.
 
+**Evaluation Pathway → [Flipped Decisions Audit](https://github.com/ANIS-Solutions/AI-onDevice/blob/main/evaluation/flipped_decisions_test.py)**
+
+```python
+vision_model_packed = onnx.load("vision_model_fp32.onnx", load_external_data=True)
+onnx.save(vision_model_packed, "vision_model_single_fp32.onnx")
+
+```
+
+The unquantized FP32 vision model is packed and retained. This is strictly required by the `../evaluation/flipped_decisions_test.py` script to run side-by-side pairwise comparisons against the FP16 model, mathematically ensuring that the quantization process caused zero safety-critical drift or false alarms.
+
 ### Step 4 — Automatic Cleanup
 
-The script automatically removes all intermediate files after a successful run:
+The script automatically removes all fragmented and intermediate files after a successful run, leaving only the packed, production-ready files:
+
+```text
+vision_model_fp32.onnx       → deleted
+vision_model_fp32.onnx.data  → deleted
+text_model_fp32.onnx         → deleted
+text_model_fp32.onnx.data    → deleted
+merged_clip_model/           → deleted
 
 ```
-vision_model_fp32.onnx        → deleted
-vision_model_fp32.onnx.data   → deleted
-text_model_fp32.onnx          → deleted
-text_model_fp32.onnx.data     → deleted
-merged_clip_model/            → deleted
-```
-
-Only the two final production models remain.
 
 ### Final Outputs
 
-| File | Size | Destination | Repository |
-|---|---|---|---|
-| `vision_model_fp16.onnx` | ~173 MB | Android `assets/` — on-device inference | [Child-app](https://github.com/ANIS-Solutions/Child-app) |
-| `text_model_single.onnx` | ~249 MB | Cloud server — policy embedding generation | [AI-hosted](https://github.com/ANIS-Solutions/AI-hosted) |
-
----
+| File | Size | Destination | Repository / Role |
+| --- | --- | --- | --- |
+| `vision_model_fp16.onnx` | ~173 MB | Android `assets/` | [Child-app](https://github.com/ANIS-Solutions/Child-app) — On-device inference |
+| `text_model_single.onnx` | ~249 MB | Cloud server | [AI-hosted](https://github.com/ANIS-Solutions/AI-hosted) — Policy embedding generation |
+| `vision_model_single_fp32.onnx` | ~346 MB | Local Evaluation |[Flipped Decisions Audit](https://github.com/ANIS-Solutions/AI-onDevice/blob/main/evaluation/flipped_decisions_test.py) — Quantization drift audit |
 
 ## Reproduce — Full Pipeline
 
@@ -287,9 +299,9 @@ Trains for 10 epochs. Progress bar shows total loss, contrastive loss, and BCE l
 python model_training/quantize_onnx.py
 ```
 
-Merges LoRA weights, exports both encoders to ONNX (opset 18), quantizes the vision model to FP16, packs the text model into a single file, and cleans up all intermediate files automatically.
+Merges LoRA weights, exports both encoders to ONNX (opset 18), quantizes the vision model to FP16, packs the text model into a single file, and the vision FP32 for comparison and cleans up all intermediate files automatically.
 
-**Output:** `vision_model_fp16.onnx` + `text_model_single.onnx`
+**Output:** `vision_model_fp16.onnx` + `text_model_single.onnx` + `vision_model_single_fp32.onnx`
 
 ---
 
