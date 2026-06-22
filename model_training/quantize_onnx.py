@@ -6,6 +6,7 @@ Description:
     2. Export both encoders to ONNX (FP32).
     3. Quantize vision encoder to FP16 for mobile deployment.
     4. Pack text encoder into a single ONNX file for server use.
+    5. Pack vision FP32 into a single file for flipped decisions evaluation.
 '''
 import os
 import shutil
@@ -95,9 +96,13 @@ def run_pipeline():
     vision_fp16 = float16.convert_float_to_float16(vision_fp32)
     onnx.save(vision_fp16, "vision_model_fp16.onnx")
 
-    print("[INFO] Packing Text Encoder into a single file...")
+    print("[INFO] Packing models into single files...")
     text_model_packed = onnx.load("text_model_fp32.onnx", load_external_data=True)
     onnx.save(text_model_packed, "text_model_single.onnx")
+
+    # Keeping the merged FP32 vision model to evaluate flipped cases against the FP16 model in the evaluation folder
+    vision_model_packed = onnx.load("vision_model_fp32.onnx", load_external_data=True)
+    onnx.save(vision_model_packed, "vision_model_single_fp32.onnx")
 
     print("[INFO] Cleaning up temporary files...")
     temp_files = [
@@ -106,6 +111,8 @@ def run_pipeline():
         "text_model_fp32.onnx",
         "text_model_fp32.onnx.data"
     ]
+    
+    # The single packed models are safe, deleting the raw fragmented files
     for f in temp_files:
         if os.path.exists(f):
             os.remove(f)
@@ -114,8 +121,9 @@ def run_pipeline():
         shutil.rmtree(MERGED_DIR)
 
     print("\n[SUCCESS] Pipeline finished! Your final production models are:")
-    print(" Mobile: vision_model_fp16.onnx")
+    print("Mobile: vision_model_fp16.onnx")
     print("Server: text_model_single.onnx")
+    print("Eval  : vision_model_single_fp32.onnx (kept for flipped decisions test)")
 
 if __name__ == "__main__":
     run_pipeline()
