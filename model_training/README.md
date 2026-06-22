@@ -8,7 +8,7 @@
 
 ## Architecture Overview
 
-![Hybrid Multi-Task CLIP Training & LoRA Co-Tuning Architecture](./_asset/Training pipline .png)
+![Hybrid Multi-Task CLIP Training & LoRA Co-Tuning Architecture](./_asset/Training%20pipline%20.png)
 
 *Hybrid Multi-Task CLIP Training & LoRA Co-Tuning Architecture — four-stage pipeline: data ingestion with dual text inputs, dual encoder co-tuning via LoRA, hybrid loss optimization (InfoNCE + BCE), and asymmetric ONNX export.*
 
